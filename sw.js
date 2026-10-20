@@ -1,5 +1,5 @@
 /* 말씀암송 오프라인 지원 */
-const CACHE="amsong-v2";
+const CACHE="amsong-v3";
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./"]).catch(()=>{})))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
@@ -11,7 +11,7 @@ self.addEventListener("fetch",e=>{
       .catch(()=>caches.match("./").then(r=>r||caches.match(req,{ignoreSearch:true}))));
     return;
   }
-  if(url.hostname==="cdn.jsdelivr.net"||url.hostname==="cdnjs.cloudflare.com"){
+  if(["cdn.jsdelivr.net","cdnjs.cloudflare.com","fonts.googleapis.com","fonts.gstatic.com"].includes(url.hostname)){
     // 글꼴: 저장본 먼저
     e.respondWith(caches.match(req).then(r=>r||fetch(req).then(res=>{if(res.ok||res.type==="opaque"){const cp=res.clone();caches.open(CACHE).then(c=>c.put(req,cp))}return res})));
   }
